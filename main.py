@@ -1,60 +1,52 @@
 from telebot import *
+from telebot.types import InputMediaPhoto, InputMediaVideo
 import os
 from dotenv import load_dotenv
+
 
 load_dotenv()
 Token = os.getenv('TOKEN')
 
 bot = telebot.TeleBot(Token)
+Photes = [
+    [InputMediaPhoto(open('Junary/1.jpg', 'rb')),
+    InputMediaPhoto(open('Junary/2.jpg', 'rb')),
+    InputMediaPhoto(open('Junary/3.jpg', 'rb')),
+    InputMediaVideo(open('Junary/6.mp4', 'rb'))],
+    [InputMediaPhoto(open('Junary/4.jpg', 'rb')),
+     InputMediaPhoto(open('Junary/5.jpg', 'rb'))],
+    [InputMediaPhoto(open('Junary/7.jpg', 'rb')),
+     InputMediaPhoto(open('Junary/8.jpg', 'rb'))]
+]
 
+texts = ["мииии, на каточке)", "люти вайб ловлю с этих фоток если честно", '"на кухню меня повором пристройте"']
 
-
+markup_index = types.ReplyKeyboardMarkup()
+btnext = types.KeyboardButton('Далее')
+markup_index.row(btnext)
+number_index = 0
 
 @bot.message_handler(commands=['start'])
 def start(message):
     markup = types.ReplyKeyboardMarkup()
-    bt1 = types.KeyboardButton('Январь', style="success")
-    bt2 = types.KeyboardButton('Феврель')
-    bt3 = types.KeyboardButton('Март')
-    bt4 = types.KeyboardButton('Апрель')
-    bt5 = types.KeyboardButton('Май')
-    bt6 = types.KeyboardButton('Июнь')
-    markup.row(bt1, bt2, bt3)
-    markup.row(bt4, bt5, bt6)
-    bot.send_message(message.chat.id, f'Привет, моя любимая! Поздравляю с полугодием <3. Предлагаю с помощью этого бота вспомнить каждый из этих шести счастливых месяцев. Люблю тебя ❤️', reply_markup=markup)
+    bt1 = types.KeyboardButton('ЕЕЕЕ ГОУ')
+    markup.row(bt1)
+    bot.send_message(message.chat.id, f'Привет, моя любимая! Поздравляю с полугодием <3. Предлагаю с помощью этого бота вспомнить все счатливые моменты. Люблю тебя ❤️', reply_markup=markup)
     bot.register_next_step_handler(message, main_menu)
 
-def January(message):
-    print(f"вызвали {message.text}")
-
-def February(message):
-    print(f"вызвали {message.text}")
-
-def March(message):
-    print(f"вызвали {message.text}")
-
-def April(message):
-    print(f"вызвали {message.text}")
-
-def May(message):
-    print(f"вызвали {message.text}")
-
-def June(message):
-    print(f"вызвали {message.text}")
-
 def main_menu(message):
-    if message.text in MonthsAction:
-        MonthsAction[message.text](message)
-    else:
-        print("Неизвестная команда")
+    print(len(Photes[number_index]))
+    bot.send_media_group(message.chat.id, Photes[number_index])
+    bot.send_message(message.chat.id, f'{texts[number_index]}', reply_markup=markup_index)
+    bot.register_next_step_handler(message, checking_messages)
 
-MonthsAction = {
-    "Январь": January,
-    "Феврель": February,
-    "Март": March,
-    "Апрель": April,
-    "Май": May,
-    "Июнь": June
-}
+def checking_messages(message):
+    global number_index
+    if message.text == "Далее":
+        number_index += 1
+        main_menu(message)
+    else:
+        bot.send_message(message.chat.id, "Нажмите кнопку 'Далее'")
+        bot.register_next_step_handler(message, checking_messages)
 
 bot.polling(non_stop=True)
